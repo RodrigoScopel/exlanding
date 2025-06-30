@@ -36,43 +36,33 @@ async function loadAndShowFrame() {
   const filename = `/frames/frame.${frameIndex}.0.json`;
   try {
     const res = await fetch(filename);
-    const array = await res.json();
+    const rows = await res.json();
 
-    console.log(`✅ Loaded frame: ${filename}`);
-    console.log(`→ Total floats: ${array.length}`);
-    console.log(`→ First point: [${array[0]}, ${array[1]}, ${array[2]}]`);
-
-    if (array.length < 3) {
-      console.warn("⚠️ Frame is empty or invalid");
-      return;
+    // Flatten the rows to [x1, y1, z1, x2, y2, z2, ...]
+    const flat = [];
+    for (let i = 0; i < rows.length; i++) {
+      const row = rows[i];
+      flat.push(row["P(0)"], row["P(1)"], row["P(2)"]);
     }
 
-    const buffer = new Float32Array(array);
+    const buffer = new Float32Array(flat);
+    console.log("✅ Parsed", buffer.length / 3, "points");
+
     const geometry = new THREE.BufferGeometry();
     geometry.setAttribute("position", new THREE.BufferAttribute(buffer, 3));
 
     const material = new THREE.PointsMaterial({
-      size: 5.0,               // very large for visibility
-      color: 0xff0000,         // bright red
+      size: 5.0,
+      color: 0x00ff00,
       transparent: false,
       opacity: 1.0,
-      depthWrite: false,
-      depthTest: false,
-      blending: THREE.NormalBlending
     });
 
     pointCloud = new THREE.Points(geometry, material);
     scene.add(pointCloud);
-    const testGeo = new THREE.BufferGeometry();
-    testGeo.setAttribute("position", new THREE.BufferAttribute(new Float32Array([0, 0, 0]), 3));
-    const testMat = new THREE.PointsMaterial({ size: 10.0, color: 0x00ff00 });
-    const testPoint = new THREE.Points(testGeo, testMat);
-    scene.add(testPoint);
-
-    console.log("✅ PointCloud added to scene");
     animate();
   } catch (e) {
-    console.error("❌ Could not load frame", filename, e);
+    console.error("❌ Could not load or parse frame", filename, e);
   }
 }
 
