@@ -43,7 +43,7 @@ function updatePointCloud(vertexArray) {
   geometry.setAttribute('position', new THREE.BufferAttribute(vertexArray, 3));
 
   const material = new THREE.PointsMaterial({
-    size: 0.02,
+    size: 1,
     color: 0xffffff,
     transparent: true,
     opacity: 0.9,
