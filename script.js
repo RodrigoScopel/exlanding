@@ -14,7 +14,7 @@ function init() {
     0.01,
     1000
   );
-  camera.position.set(0, 0, 1); // very close
+  camera.position.set(0, 0, 300); // very close
   camera.lookAt(0, 0, 0);
 
   renderer = new THREE.WebGLRenderer({ alpha: true });
