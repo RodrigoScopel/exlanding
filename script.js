@@ -33,7 +33,7 @@ function init() {
 }
 
 async function loadAndShowFrame() {
-  const filename = `https://raw.githubusercontent.com/RodrigoScopel/exlanding/main/frames/frame.${frameIndex}.0.json`;
+  const filename = `/frames/frame.${frameIndex}.0.json`;
   try {
     const res = await fetch(filename);
     const array = await res.json();
