@@ -1,52 +1,112 @@
-<!-- <!DOCTYPE html>
-
-
-<html lang="en">
-
-<head>
-  <meta charset="UTF-8" />
-  <title>Point Cloud</title>
-  <style>
-  body, html {
-    margin: 0;
-    overflow: hidden;
-    background: black;
-  }
-  canvas {
-    display: block;
-    position: fixed;
-    top: 0;
-    left: 0;
-  }
-</style>
-</head>
-<body>
-  <script src="https://cdn.jsdelivr.net/npm/three@0.160.1/build/three.min.js"></script>
-  <script src="script.js"></script>
-</body>
-</html> -->
-
 <!DOCTYPE html>
 <html lang="en">
 <head>
   <meta charset="UTF-8" />
-  <title>Three.js Debug</title>
+  <title>Point Cloud Animation</title>
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
   <style>
-    body, html {
+    html, body {
       margin: 0;
+      padding: 0;
       overflow: hidden;
-      background: black;
+      background-color: black;
     }
     canvas {
       display: block;
-      position: fixed;
-      top: 0;
-      left: 0;
     }
   </style>
 </head>
 <body>
-  <script src="https://cdn.jsdelivr.net/npm/three@0.160.1/build/three.min.js"></script>
-  <script src="script.js"></script>
+  <script type="module">
+    import * as THREE from 'https://cdn.jsdelivr.net/npm/three@0.150.1/build/three.module.js';
+
+    let scene, camera, renderer;
+    let geometry, material, pointCloud;
+    let frameData = {};
+    let frameOrder = [13, 14]; // You can extend this list
+    let currentFrame = 13;
+    let lastRenderTime = 0;
+    const frameDuration = 1000 / 60; // 60 FPS
+
+    init();
+    loadFramesInBackground();
+    animate();
+
+    function init() {
+      scene = new THREE.Scene();
+
+      camera = new THREE.PerspectiveCamera(
+        75,
+        window.innerWidth / window.innerHeight,
+        0.1,
+        2000
+      );
+      camera.position.set(0, 0, 800);
+      camera.lookAt(0, 0, 0);
+
+      renderer = new THREE.WebGLRenderer({ alpha: true });
+      renderer.setSize(window.innerWidth, window.innerHeight);
+      document.body.appendChild(renderer.domElement);
+
+      window.addEventListener("resize", () => {
+        camera.aspect = window.innerWidth / window.innerHeight;
+        camera.updateProjectionMatrix();
+        renderer.setSize(window.innerWidth, window.innerHeight);
+      });
+    }
+
+    function loadFramesInBackground() {
+      for (let i of frameOrder) {
+        const filename = `/frames/frame.${i.toString().padStart(4, '0')}.0.json`;
+        fetch(filename)
+          .then(res => res.json())
+          .then(data => {
+            frameData[i] = new Float32Array(data);
+            if (i === frameOrder[0]) setupPointCloud(frameData[i]);
+            console.log(`✅ Loaded: ${filename}`);
+          })
+          .catch(err => console.warn(`❌ Failed to load ${filename}`, err));
+      }
+    }
+
+    function setupPointCloud(buffer) {
+      geometry = new THREE.BufferGeometry();
+      geometry.setAttribute("position", new THREE.BufferAttribute(buffer, 3));
+
+      material = new THREE.PointsMaterial({
+        size: 5.0,
+        color: 0xff00ff,
+        transparent: true,
+        opacity: 1.0,
+        depthTest: false,
+        depthWrite: false,
+        blending: THREE.AdditiveBlending
+      });
+
+      pointCloud = new THREE.Points(geometry, material);
+      scene.add(pointCloud);
+    }
+
+    function updatePointCloud(buffer) {
+      geometry.attributes.position.array.set(buffer);
+      geometry.attributes.position.needsUpdate = true;
+    }
+
+    function animate(timestamp) {
+      requestAnimationFrame(animate);
+
+      if (!lastRenderTime || timestamp - lastRenderTime >= frameDuration) {
+        const buffer = frameData[currentFrame];
+        if (buffer) {
+          updatePointCloud(buffer);
+          const nextIndex = (frameOrder.indexOf(currentFrame) + 1) % frameOrder.length;
+          currentFrame = frameOrder[nextIndex];
+        }
+        lastRenderTime = timestamp;
+      }
+
+      renderer.render(scene, camera);
+    }
+  </script>
 </body>
 </html>

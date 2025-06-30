@@ -1,29 +1,30 @@
 let scene, camera, renderer;
-let pointCloud;
-let frameIndex = 1;
+let geometry, material, pointCloud;
+let frameData = {}; // store loaded frames
+let frameCount = 240; // total frames you have
+let currentFrame = 1;
+let lastRenderTime = 0;
+const frameDuration = 1000 / 60; // 60 FPS
 
 init();
-loadAndShowFrame();
+loadFramesInBackground();
+animate();
 
 function init() {
   scene = new THREE.Scene();
 
-  // Move camera far enough to see a -100 to +100 range
   camera = new THREE.PerspectiveCamera(
     75,
     window.innerWidth / window.innerHeight,
-    0.1,    // near
-    1000    // far
+    0.1,
+    1000
   );
-  camera.position.set(0, 0, 300); // pulled way back
+  camera.position.set(0, 0, 500);
   camera.lookAt(0, 0, 0);
 
   renderer = new THREE.WebGLRenderer({ alpha: true });
   renderer.setSize(window.innerWidth, window.innerHeight);
   document.body.appendChild(renderer.domElement);
-
-  const axesHelper = new THREE.AxesHelper(50);
-  scene.add(axesHelper);
 
   window.addEventListener("resize", () => {
     camera.aspect = window.innerWidth / window.innerHeight;
@@ -32,42 +33,63 @@ function init() {
   });
 }
 
-async function loadAndShowFrame() {
-  const filename = `/frames/frame.${frameIndex}.0.json`;
-  try {
-    const res = await fetch(filename);
-    const rows = await res.json();
+function loadFramesInBackground() {
+  for (let i = 1; i <= frameCount; i++) {
+    const filename = `/frames/frame.${String(i).padStart(4, '0')}.0.json`;
 
-    // Flatten the rows to [x1, y1, z1, x2, y2, z2, ...]
-    const flat = [];
-    for (let i = 0; i < rows.length; i++) {
-      const row = rows[i];
-      flat.push(row["P(0)"], row["P(1)"], row["P(2)"]);
-    }
-
-    const buffer = new Float32Array(flat);
-    console.log("✅ Parsed", buffer.length / 3, "points");
-
-    const geometry = new THREE.BufferGeometry();
-    geometry.setAttribute("position", new THREE.BufferAttribute(buffer, 3));
-
-    const material = new THREE.PointsMaterial({
-      size: 5.0,
-      color: 0x00ff00,
-      transparent: false,
-      opacity: 1.0,
-    });
-
-    pointCloud = new THREE.Points(geometry, material);
-    scene.add(pointCloud);
-    animate();
-  } catch (e) {
-    console.error("❌ Could not load or parse frame", filename, e);
+    fetch(filename)
+      .then(res => res.json())
+      .then(data => {
+        frameData[i] = new Float32Array(data);
+        if (i === 1) {
+          setupPointCloud(frameData[i]); // render first frame immediately
+        }
+        console.log(`✅ Loaded: ${filename}`);
+      })
+      .catch(err => {
+        console.warn(`❌ Failed to load ${filename}`, err);
+      });
   }
 }
 
-function animate() {
-  console.log("🔄 Animate loop running");
+function setupPointCloud(buffer) {
+  geometry = new THREE.BufferGeometry();
+  geometry.setAttribute("position", new THREE.BufferAttribute(buffer, 3));
+
+  material = new THREE.PointsMaterial({
+    size: 5.0,
+    color: 0xff00ff,
+    transparent: true,
+    opacity: 1.0,
+    depthTest: false,
+    depthWrite: false,
+    blending: THREE.AdditiveBlending
+  });
+
+  pointCloud = new THREE.Points(geometry, material);
+  scene.add(pointCloud);
+}
+
+function updatePointCloud(buffer) {
+  geometry.attributes.position.array.set(buffer);
+  geometry.attributes.position.needsUpdate = true;
+}
+
+function animate(timestamp) {
   requestAnimationFrame(animate);
+
+  if (!lastRenderTime || timestamp - lastRenderTime >= frameDuration) {
+    const buffer = frameData[currentFrame];
+    if (buffer) {
+      updatePointCloud(buffer);
+      currentFrame++;
+      if (currentFrame > frameCount) currentFrame = 1;
+    } else {
+      // wait until frame is loaded
+      console.log(`⏳ Waiting for frame ${currentFrame}`);
+    }
+    lastRenderTime = timestamp;
+  }
+
   renderer.render(scene, camera);
 }
