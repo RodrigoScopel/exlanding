@@ -37,30 +37,37 @@ async function loadAndShowFrame() {
   try {
     const res = await fetch(filename);
     const array = await res.json();
+
+    console.log(`✅ Loaded frame: ${filename}`);
+    console.log(`→ Total floats: ${array.length}`);
+    console.log(`→ First point: [${array[0]}, ${array[1]}, ${array[2]}]`);
+
+    if (array.length < 3) {
+      console.warn("⚠️ Frame is empty or invalid");
+      return;
+    }
+
     const buffer = new Float32Array(array);
-
-    console.log(`Loaded frame ${frameIndex}`, buffer.length / 3, "points");
-    console.log("Sample point:", buffer[0], buffer[1], buffer[2]);
-
     const geometry = new THREE.BufferGeometry();
     geometry.setAttribute("position", new THREE.BufferAttribute(buffer, 3));
 
     const material = new THREE.PointsMaterial({
-      size: 2.0, // increase size because points are far away
-      color: 0x00ffff,
-      transparent: true,
+      size: 5.0,               // very large for visibility
+      color: 0xff0000,         // bright red
+      transparent: false,
       opacity: 1.0,
       depthWrite: false,
       depthTest: false,
-      blending: THREE.AdditiveBlending
+      blending: THREE.NormalBlending
     });
 
     pointCloud = new THREE.Points(geometry, material);
     scene.add(pointCloud);
 
+    console.log("✅ PointCloud added to scene");
     animate();
   } catch (e) {
-    console.error("Could not load frame", filename, e);
+    console.error("❌ Could not load frame", filename, e);
   }
 }
 
