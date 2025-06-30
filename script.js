@@ -3,7 +3,7 @@ import * as THREE from 'https://cdn.skypack.dev/three';
 let scene, camera, renderer;
 let pointCloud;
 let frameIndex = 0;
-const totalFrames = 10;
+const totalFrames = 599;
 let frameData = [];
 
 init();
