@@ -32,6 +32,11 @@ function init() {
   // Debug axes
   const axesHelper = new THREE.AxesHelper(1);
   scene.add(axesHelper);
+  const box = new THREE.Mesh(
+  new THREE.BoxGeometry(0.5, 0.5, 0.5),
+  new THREE.MeshBasicMaterial({ color: 0xff0000 })
+);
+scene.add(box);
 
   window.addEventListener("resize", () => {
     camera.aspect = window.innerWidth / window.innerHeight;
