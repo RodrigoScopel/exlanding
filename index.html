@@ -18,15 +18,15 @@
 </head>
 <body>
   <script type="module">
-     import * as THREE from 'https://cdn.jsdelivr.net/npm/three@0.150.1/build/three.module.js';
+    import * as THREE from 'https://cdn.jsdelivr.net/npm/three@0.150.1/build/three.module.js';
 
     let scene, camera, renderer;
     let geometry, material, pointCloud;
     let frameData = {};
-    let frameCount = 240;
-    let currentFrame = 1;
+    let frameOrder = [13, 14]; // You can extend this list
+    let currentFrame = 13;
     let lastRenderTime = 0;
-    const frameDuration = 1000 / 60;
+    const frameDuration = 1000 / 60; // 60 FPS
 
     init();
     loadFramesInBackground();
@@ -39,9 +39,9 @@
         75,
         window.innerWidth / window.innerHeight,
         0.1,
-        1000
+        2000
       );
-      camera.position.set(0, 0, 500);
+      camera.position.set(0, 0, 800);
       camera.lookAt(0, 0, 0);
 
       renderer = new THREE.WebGLRenderer({ alpha: true });
@@ -56,14 +56,13 @@
     }
 
     function loadFramesInBackground() {
-      for (let i = 1; i <= frameCount; i++) {
-        const filename = `/frames/frame.${String(i).padStart(4, '0')}.0.json`;
-
+      for (let i of frameOrder) {
+        const filename = `/frames/frame.${i.toString().padStart(4, '0')}.0.json`;
         fetch(filename)
           .then(res => res.json())
           .then(data => {
             frameData[i] = new Float32Array(data);
-            if (i === 1) setupPointCloud(frameData[i]); // show first frame immediately
+            if (i === frameOrder[0]) setupPointCloud(frameData[i]);
             console.log(`✅ Loaded: ${filename}`);
           })
           .catch(err => console.warn(`❌ Failed to load ${filename}`, err));
@@ -100,9 +99,8 @@
         const buffer = frameData[currentFrame];
         if (buffer) {
           updatePointCloud(buffer);
-          currentFrame = (currentFrame + 1 > frameCount) ? 1 : currentFrame + 1;
-        } else {
-          console.log(`⏳ Waiting for frame ${currentFrame}`);
+          const nextIndex = (frameOrder.indexOf(currentFrame) + 1) % frameOrder.length;
+          currentFrame = frameOrder[nextIndex];
         }
         lastRenderTime = timestamp;
       }
