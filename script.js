@@ -1,15 +1,14 @@
 let scene, camera, renderer;
-let pointCloud, geometry, material;
-let frameIndex = 0;
-const totalFrames = 240;
-const frameData = [];
+let geometry, material, pointCloud;
+let frameData = {}; // store loaded frames
+let frameCount = 240; // total frames you have
+let currentFrame = 1;
+let lastRenderTime = 0;
+const frameDuration = 1000 / 60; // 60 FPS
 
 init();
-loadAllFrames().then(() => {
-  console.log("✅ All frames loaded. Starting animation...");
-  setupPointCloud(frameData[0]); // setup first frame immediately
-  animate();
-});
+loadFramesInBackground();
+animate();
 
 function init() {
   scene = new THREE.Scene();
@@ -20,7 +19,7 @@ function init() {
     0.1,
     1000
   );
-  camera.position.set(0, 0, 300);
+  camera.position.set(0, 0, 500);
   camera.lookAt(0, 0, 0);
 
   renderer = new THREE.WebGLRenderer({ alpha: true });
@@ -34,19 +33,22 @@ function init() {
   });
 }
 
-async function loadAllFrames() {
-  for (let i = 1; i <= totalFrames; i++) {
+function loadFramesInBackground() {
+  for (let i = 1; i <= frameCount; i++) {
     const filename = `/frames/frame.${String(i).padStart(4, '0')}.0.json`;
-    try {
-      const res = await fetch(filename);
-      const data = await res.json();
-      if (Array.isArray(data) && data.length >= 3) {
-        frameData.push(new Float32Array(data));
+
+    fetch(filename)
+      .then(res => res.json())
+      .then(data => {
+        frameData[i] = new Float32Array(data);
+        if (i === 1) {
+          setupPointCloud(frameData[i]); // render first frame immediately
+        }
         console.log(`✅ Loaded: ${filename}`);
-      }
-    } catch (e) {
-      console.warn(`❌ Failed to load: ${filename}`, e);
-    }
+      })
+      .catch(err => {
+        console.warn(`❌ Failed to load ${filename}`, err);
+      });
   }
 }
 
@@ -68,14 +70,25 @@ function setupPointCloud(buffer) {
   scene.add(pointCloud);
 }
 
-function animate() {
+function updatePointCloud(buffer) {
+  geometry.attributes.position.array.set(buffer);
+  geometry.attributes.position.needsUpdate = true;
+}
+
+function animate(timestamp) {
   requestAnimationFrame(animate);
 
-  const buffer = frameData[frameIndex];
-  if (buffer) {
-    geometry.attributes.position.array.set(buffer); // update position data
-    geometry.attributes.position.needsUpdate = true;
-    frameIndex = (frameIndex + 1) % frameData.length;
+  if (!lastRenderTime || timestamp - lastRenderTime >= frameDuration) {
+    const buffer = frameData[currentFrame];
+    if (buffer) {
+      updatePointCloud(buffer);
+      currentFrame++;
+      if (currentFrame > frameCount) currentFrame = 1;
+    } else {
+      // wait until frame is loaded
+      console.log(`⏳ Waiting for frame ${currentFrame}`);
+    }
+    lastRenderTime = timestamp;
   }
 
   renderer.render(scene, camera);
