@@ -63,7 +63,7 @@
           .then(res => res.json())
           .then(data => {
             frameData[i] = new Float32Array(data);
-            if (i === 1) setupPointCloud(frameData[i]);
+            if (i === 1) setupPointCloud(frameData[i]); // show first frame immediately
             console.log(`✅ Loaded: ${filename}`);
           })
           .catch(err => console.warn(`❌ Failed to load ${filename}`, err));
@@ -101,6 +101,8 @@
         if (buffer) {
           updatePointCloud(buffer);
           currentFrame = (currentFrame + 1 > frameCount) ? 1 : currentFrame + 1;
+        } else {
+          console.log(`⏳ Waiting for frame ${currentFrame}`);
         }
         lastRenderTime = timestamp;
       }
