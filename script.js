@@ -4,6 +4,7 @@ let frameIndex = 0;
 const totalFrames = 240;
 const frameData = [];
 
+
 init();
 loadAllFrames().then(() => {
   console.log("✅ All frames loaded. Starting animation...");
