@@ -77,6 +77,7 @@ async function loadAndShowFrame() {
 }
 
 function animate() {
+  console.log("🔄 Animate loop running");
   requestAnimationFrame(animate);
   renderer.render(scene, camera);
 }
