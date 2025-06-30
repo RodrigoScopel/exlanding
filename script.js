@@ -1,6 +1,6 @@
 let scene, camera, renderer;
 let pointCloud;
-let frameIndex = 300; // we'll test just one frame
+let frameIndex = 1;
 
 init();
 loadAndShowFrame();
@@ -8,20 +8,21 @@ loadAndShowFrame();
 function init() {
   scene = new THREE.Scene();
 
+  // Move camera far enough to see a -100 to +100 range
   camera = new THREE.PerspectiveCamera(
     75,
     window.innerWidth / window.innerHeight,
-    0.01,
-    1000
+    0.1,    // near
+    1000    // far
   );
-  camera.position.set(0, 0, 300); // very close
+  camera.position.set(0, 0, 300); // pulled way back
   camera.lookAt(0, 0, 0);
 
   renderer = new THREE.WebGLRenderer({ alpha: true });
   renderer.setSize(window.innerWidth, window.innerHeight);
   document.body.appendChild(renderer.domElement);
 
-  const axesHelper = new THREE.AxesHelper(1);
+  const axesHelper = new THREE.AxesHelper(50);
   scene.add(axesHelper);
 
   window.addEventListener("resize", () => {
@@ -45,8 +46,8 @@ async function loadAndShowFrame() {
     geometry.setAttribute("position", new THREE.BufferAttribute(buffer, 3));
 
     const material = new THREE.PointsMaterial({
-      size: 0.05,
-      color: 0xff00ff,
+      size: 2.0, // increase size because points are far away
+      color: 0x00ffff,
       transparent: true,
       opacity: 1.0,
       depthWrite: false,
