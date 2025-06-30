@@ -71,6 +71,7 @@ function updatePointCloud(buffer) {
 }
 
 function animate() {
+  console.log("🔁 Animate loop running", frameIndex);
   requestAnimationFrame(animate);
 
   const buffer = frameData[frameIndex];
