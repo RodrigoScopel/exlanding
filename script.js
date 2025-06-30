@@ -1,20 +1,107 @@
-// THREE is assumed to be loaded globally from a <script> tag
+// // THREE is assumed to be loaded globally from a <script> tag
+
+// let scene, camera, renderer;
+// let pointCloud;
+// let frameIndex = 0;
+// const totalFrames = 599; // Adjust to match your number of frames
+// let frameData = [];
+
+// init();
+// loadAllFrames().then(() => {
+//   animate();
+// });
+
+// function init() {
+//   scene = new THREE.Scene();
+
+//   // Camera setup
+//   camera = new THREE.PerspectiveCamera(
+//     75,
+//     window.innerWidth / window.innerHeight,
+//     0.01,
+//     1000
+//   );
+//   camera.position.z = 2;
+//   camera.lookAt(0, 0, 0);
+
+//   // Renderer
+//   renderer = new THREE.WebGLRenderer({ alpha: true });
+//   renderer.setSize(window.innerWidth, window.innerHeight);
+//   document.body.appendChild(renderer.domElement);
+
+//   // ✅ Add debug box to test visibility
+//   const box = new THREE.Mesh(
+//     new THREE.BoxGeometry(0.5, 0.5, 0.5),
+//     new THREE.MeshBasicMaterial({ color: 0xff0000 })
+//   );
+//   scene.add(box);
+
+//   // Optional: Axes helper
+//   const axesHelper = new THREE.AxesHelper(1);
+//   scene.add(axesHelper);
+
+//   // Resize handling
+//   window.addEventListener("resize", () => {
+//     camera.aspect = window.innerWidth / window.innerHeight;
+//     camera.updateProjectionMatrix();
+//     renderer.setSize(window.innerWidth, window.innerHeight);
+//   });
+// }
+
+// async function loadAllFrames() {
+//   for (let i = 0; i < totalFrames; i++) {
+//     const filename = `/frames/frame.${i}.0.json`;
+//     try {
+//       const res = await fetch(filename);
+//       const array = await res.json();
+//       frameData.push(new Float32Array(array));
+//     } catch (e) {
+//       console.warn("Missing or invalid frame:", filename);
+//     }
+//   }
+// }
+
+// function updatePointCloud(vertexArray) {
+//   const geometry = new THREE.BufferGeometry();
+//   geometry.setAttribute("position", new THREE.BufferAttribute(vertexArray, 3));
+
+//     const material = new THREE.PointsMaterial({
+//       size: 0.2,
+//       color: 0x00ff00, // bright green
+//       transparent: true,
+//       opacity: 1.0,
+//       depthWrite: false,
+//       depthTest: false,
+//       blending: THREE.AdditiveBlending
+//     });
+
+//   if (pointCloud) scene.remove(pointCloud);
+//   pointCloud = new THREE.Points(geometry, material);
+//   scene.add(pointCloud);
+// }
+
+// function animate() {
+//   requestAnimationFrame(animate);
+
+//   const points = frameData[frameIndex];
+//   if (points) {
+//     updatePointCloud(points);
+//     frameIndex = (frameIndex + 1) % frameData.length;
+//   }
+
+//   renderer.render(scene, camera);
+// }
+
+// Basic scene setup to render a red cube
 
 let scene, camera, renderer;
-let pointCloud;
-let frameIndex = 0;
-const totalFrames = 599; // Adjust to match your number of frames
-let frameData = [];
 
 init();
-loadAllFrames().then(() => {
-  animate();
-});
+animate();
 
 function init() {
   scene = new THREE.Scene();
 
-  // Camera setup
   camera = new THREE.PerspectiveCamera(
     75,
     window.innerWidth / window.innerHeight,
@@ -22,25 +109,23 @@ function init() {
     1000
   );
   camera.position.z = 2;
-  camera.lookAt(0, 0, 0);
 
-  // Renderer
   renderer = new THREE.WebGLRenderer({ alpha: true });
   renderer.setSize(window.innerWidth, window.innerHeight);
   document.body.appendChild(renderer.domElement);
 
-  // ✅ Add debug box to test visibility
+  // Add red box
   const box = new THREE.Mesh(
     new THREE.BoxGeometry(0.5, 0.5, 0.5),
     new THREE.MeshBasicMaterial({ color: 0xff0000 })
   );
   scene.add(box);
 
-  // Optional: Axes helper
+  // Axes helper (optional)
   const axesHelper = new THREE.AxesHelper(1);
   scene.add(axesHelper);
 
-  // Resize handling
+  // Resize
   window.addEventListener("resize", () => {
     camera.aspect = window.innerWidth / window.innerHeight;
     camera.updateProjectionMatrix();
@@ -48,46 +133,7 @@ function init() {
   });
 }
 
-async function loadAllFrames() {
-  for (let i = 0; i < totalFrames; i++) {
-    const filename = `/frames/frame.${i}.0.json`;
-    try {
-      const res = await fetch(filename);
-      const array = await res.json();
-      frameData.push(new Float32Array(array));
-    } catch (e) {
-      console.warn("Missing or invalid frame:", filename);
-    }
-  }
-}
-
-function updatePointCloud(vertexArray) {
-  const geometry = new THREE.BufferGeometry();
-  geometry.setAttribute("position", new THREE.BufferAttribute(vertexArray, 3));
-
-    const material = new THREE.PointsMaterial({
-      size: 0.2,
-      color: 0x00ff00, // bright green
-      transparent: true,
-      opacity: 1.0,
-      depthWrite: false,
-      depthTest: false,
-      blending: THREE.AdditiveBlending
-    });
-
-  if (pointCloud) scene.remove(pointCloud);
-  pointCloud = new THREE.Points(geometry, material);
-  scene.add(pointCloud);
-}
-
 function animate() {
   requestAnimationFrame(animate);
-
-  const points = frameData[frameIndex];
-  if (points) {
-    updatePointCloud(points);
-    frameIndex = (frameIndex + 1) % frameData.length;
-  }
-
   renderer.render(scene, camera);
 }
