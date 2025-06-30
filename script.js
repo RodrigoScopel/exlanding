@@ -41,9 +41,10 @@ async function loadAllFrames() {
     try {
       const res = await fetch(filename);
       const data = await res.json();
+      console.log(`✅ Loaded: ${filename} → ${data.length / 3} points`);
       frameData.push(new Float32Array(data));
     } catch (e) {
-      console.warn(`⚠️ Failed to load ${filename}`, e);
+      console.warn(`❌ Failed to load: ${filename}`, e);
     }
   }
 }
