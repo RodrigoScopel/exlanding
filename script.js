@@ -23,9 +23,9 @@ function init() {
     75,
     window.innerWidth / window.innerHeight,
     0.1,
-    1000
+    500
   );
-  camera.position.set(0, 0, 300);  // Adjust based on your point cloud range
+  camera.position.set(0, 0, 500);  // Adjust based on your point cloud range
   camera.lookAt(0, 0, 0);
 
   renderer = new THREE.WebGLRenderer({ alpha: true });
@@ -58,7 +58,7 @@ function updatePointCloud(buffer) {
   geometry.setAttribute("position", new THREE.BufferAttribute(buffer, 3));
 
   const material = new THREE.PointsMaterial({
-    size: 5.0,                  // ⬅️ large points
+    size: 0.1,                  // ⬅️ large points
     color: 0x00ffff,            // ⬅️ bright color
     transparent: true,
     opacity: 1.0,
