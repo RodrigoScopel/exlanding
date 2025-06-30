@@ -1,13 +1,13 @@
 let scene, camera, renderer;
-let pointCloud;
+let pointCloud, geometry, material;
 let frameIndex = 0;
 const totalFrames = 240;
 const frameData = [];
 
-
 init();
 loadAllFrames().then(() => {
   console.log("✅ All frames loaded. Starting animation...");
+  setupPointCloud(frameData[0]); // setup first frame immediately
   animate();
 });
 
@@ -40,33 +40,29 @@ async function loadAllFrames() {
     try {
       const res = await fetch(filename);
       const data = await res.json();
-      frameData.push(new Float32Array(data));
-      console.log(`✅ Loaded: ${filename}`);
+      if (Array.isArray(data) && data.length >= 3) {
+        frameData.push(new Float32Array(data));
+        console.log(`✅ Loaded: ${filename}`);
+      }
     } catch (e) {
       console.warn(`❌ Failed to load: ${filename}`, e);
     }
   }
 }
 
-function updatePointCloud(buffer) {
-  const geometry = new THREE.BufferGeometry();
+function setupPointCloud(buffer) {
+  geometry = new THREE.BufferGeometry();
   geometry.setAttribute("position", new THREE.BufferAttribute(buffer, 3));
 
-  const material = new THREE.PointsMaterial({
+  material = new THREE.PointsMaterial({
     size: 5.0,
-    color: 0x00ffff,
+    color: 0xff00ff,
     transparent: true,
     opacity: 1.0,
     depthTest: false,
     depthWrite: false,
-    blending: THREE.AdditiveBlending,
+    blending: THREE.AdditiveBlending
   });
-
-  if (pointCloud) {
-    scene.remove(pointCloud);
-    pointCloud.geometry.dispose();
-    pointCloud.material.dispose();
-  }
 
   pointCloud = new THREE.Points(geometry, material);
   scene.add(pointCloud);
@@ -77,7 +73,8 @@ function animate() {
 
   const buffer = frameData[frameIndex];
   if (buffer) {
-    updatePointCloud(buffer);
+    geometry.attributes.position.array.set(buffer); // update position data
+    geometry.attributes.position.needsUpdate = true;
     frameIndex = (frameIndex + 1) % frameData.length;
   }
 
