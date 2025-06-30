@@ -31,7 +31,7 @@ function init() {
 
 async function loadAllFrames() {
   for (let i = 0; i < totalFrames; i++) {
-    const filename = `pointcloud_frames/frame.${i}.0.json`;
+    const filename = `frames/frame.${i}.0.json`;
     const res = await fetch(filename);
     const array = await res.json();
     frameData.push(new Float32Array(array));
