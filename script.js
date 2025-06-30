@@ -57,15 +57,15 @@ function updatePointCloud(vertexArray) {
   const geometry = new THREE.BufferGeometry();
   geometry.setAttribute("position", new THREE.BufferAttribute(vertexArray, 3));
 
-  const material = new THREE.PointsMaterial({
-    size: 0.2, // Increased size for visibility
-    color: 0xff00ff,
-    transparent: true,
-    opacity: 1.0,
-    depthWrite: false,
-    depthTest: false,
-    blending: THREE.AdditiveBlending,
-  });
+    const material = new THREE.PointsMaterial({
+      size: 0.2,
+      color: 0x00ff00, // bright green
+      transparent: true,
+      opacity: 1.0,
+      depthWrite: false,
+      depthTest: false,
+      blending: THREE.AdditiveBlending
+    });
 
   if (pointCloud) scene.remove(pointCloud);
   pointCloud = new THREE.Points(geometry, material);
