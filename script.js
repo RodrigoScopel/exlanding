@@ -63,6 +63,11 @@ async function loadAndShowFrame() {
 
     pointCloud = new THREE.Points(geometry, material);
     scene.add(pointCloud);
+    const testGeo = new THREE.BufferGeometry();
+    testGeo.setAttribute("position", new THREE.BufferAttribute(new Float32Array([0, 0, 0]), 3));
+    const testMat = new THREE.PointsMaterial({ size: 10.0, color: 0x00ff00 });
+    const testPoint = new THREE.Points(testGeo, testMat);
+    scene.add(testPoint);
 
     console.log("✅ PointCloud added to scene");
     animate();
