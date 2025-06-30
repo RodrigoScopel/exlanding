@@ -14,7 +14,7 @@ loadAllFrames().then(() => {
 function init() {
   scene = new THREE.Scene();
 
-  // Camera settings
+  // Camera setup
   camera = new THREE.PerspectiveCamera(
     75,
     window.innerWidth / window.innerHeight,
@@ -29,15 +29,18 @@ function init() {
   renderer.setSize(window.innerWidth, window.innerHeight);
   document.body.appendChild(renderer.domElement);
 
-  // Debug axes
+  // ✅ Add debug box to test visibility
+  const box = new THREE.Mesh(
+    new THREE.BoxGeometry(0.5, 0.5, 0.5),
+    new THREE.MeshBasicMaterial({ color: 0xff0000 })
+  );
+  scene.add(box);
+
+  // Optional: Axes helper
   const axesHelper = new THREE.AxesHelper(1);
   scene.add(axesHelper);
-  const box = new THREE.Mesh(
-  new THREE.BoxGeometry(0.5, 0.5, 0.5),
-  new THREE.MeshBasicMaterial({ color: 0xff0000 })
-);
-scene.add(box);
 
+  // Resize handling
   window.addEventListener("resize", () => {
     camera.aspect = window.innerWidth / window.innerHeight;
     camera.updateProjectionMatrix();
