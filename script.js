@@ -35,7 +35,7 @@ function init() {
 
 async function loadAllFrames() {
   for (let i = 1; i <= totalFrames; i++) {
-    const filename = `/frames/frame.${String(i).padStart(4, '0')}.0.json`;
+    const filename = `/frames/frame.${String(i).padStart(3, '0')}.0.json`;
     try {
       const res = await fetch(filename);
       const data = await res.json();
