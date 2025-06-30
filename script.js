@@ -1,6 +1,6 @@
 let scene, camera, renderer;
 let pointCloud;
-let frameIndex = 1; // we'll test just one frame
+let frameIndex = 300; // we'll test just one frame
 
 init();
 loadAndShowFrame();
