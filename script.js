@@ -1,6 +1,6 @@
 let scene, camera, renderer;
 let pointCloud;
-let frameIndex = 0;
+let frameIndex = 100;
 const totalFrames = 120; // change to match your actual number of frames
 let frameData = [];
 
@@ -54,7 +54,7 @@ function updatePointCloud(vertexArray) {
   geometry.setAttribute("position", new THREE.BufferAttribute(vertexArray, 3));
 
   const material = new THREE.PointsMaterial({
-    size: 0.2,
+    size: 2,
     color: 0x00ff00, // bright green
     transparent: true,
     opacity: 1.0,
