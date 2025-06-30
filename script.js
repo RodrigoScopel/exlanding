@@ -14,7 +14,10 @@ loadAllFrames().then(() => {
 
 function init() {
   scene = new THREE.Scene();
-
+  const testGeo = new THREE.BufferGeometry();
+  testGeo.setAttribute("position", new THREE.BufferAttribute(new Float32Array([0, 0, 0]), 3));
+  const testMat = new THREE.PointsMaterial({ size: 10.0, color: 0xff0000 });
+  scene.add(new THREE.Points(testGeo, testMat));
   camera = new THREE.PerspectiveCamera(
     75,
     window.innerWidth / window.innerHeight,
