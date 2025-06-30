@@ -57,15 +57,24 @@ function updatePointCloud(buffer) {
   geometry.setAttribute("position", new THREE.BufferAttribute(buffer, 3));
 
   const material = new THREE.PointsMaterial({
-    size: 2.0,
-    color: 0x00ffff,
+    size: 5.0,                  // ⬅️ large points
+    color: 0x00ffff,            // ⬅️ bright color
     transparent: true,
     opacity: 1.0,
+    depthTest: false,           // ⬅️ always render
     depthWrite: false,
     blending: THREE.AdditiveBlending
   });
 
-  if (pointCloud) scene.remove(pointCloud);
+  // optional debug log
+  console.log(`🎯 Rendering frame with ${buffer.length / 3} points`);
+
+  if (pointCloud) {
+    scene.remove(pointCloud);
+    pointCloud.geometry.dispose();
+    pointCloud.material.dispose();
+  }
+
   pointCloud = new THREE.Points(geometry, material);
   scene.add(pointCloud);
 }
